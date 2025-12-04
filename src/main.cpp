@@ -11,6 +11,7 @@
 
 #include "crsf.h"
 #include "mavlink.h"
+#include "config.h"
 
 #ifndef LED_BUILTIN
   #define LED_BUILTIN 2  // GPIO2 для большинства ESP32
@@ -22,15 +23,10 @@
 #define TELEMETRY_TIMEOUT_MS 3000
 #define UDP_DATA_SEND_INTERVAL_MS   100
 
-// MAC address ELRS Backpack. Look it at Backpack internet html page.
-uint8_t UID[6] = {78, 82, 166, 251, 35, 234};
-// WIFI access point setup
-const char* ap_ssid = "mavlink";
-const char* ap_password = "12345678";  // It needs 8 symbols
+
 
 // UDP setup
 WiFiUDP udp;
-const uint16_t UDP_PORT = 14550; // GCS port
 IPAddress broadcastIP(255, 255, 255, 255);
 
 
@@ -269,6 +265,7 @@ void printTelemetry(const TelemetryData_t* td) {
 }
 
 void loop() {
+#ifdef DEBUG_TO_LOG
     static uint32_t lastDisplay = 0;
     static uint32_t lastTelemetryPrint = 0;
     static uint32_t lastBlink = 0;
@@ -315,4 +312,5 @@ void loop() {
         }
         lastTelemetryPrint = millis();
     }
+#endif
 }
