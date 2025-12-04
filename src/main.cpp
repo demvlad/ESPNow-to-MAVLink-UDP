@@ -20,6 +20,9 @@
 
 // MAC адрес как в рабочем коде
 uint8_t UID[6] = {78, 82, 166, 251, 35, 234}; // {0x4E, 0x52, 0xA6, 0xFB, 0x23, 0xEA}
+// Настройки точки доступа
+const char* ap_ssid = "mavlink";
+const char* ap_password = "12345678";  // Минимум 8 символов
 
 
 // Структура для очереди
@@ -115,6 +118,30 @@ void setup() {
     if (taskResult != pdPASS) {
         Serial.println("ERROR: Failed to create processing task!");
         ESP.restart();
+    }
+
+    // Создаем точку доступа
+    bool apStarted = WiFi.softAP(ap_ssid, ap_password);
+
+    if (apStarted) {
+        Serial.println("Точка доступа создана успешно!");
+        Serial.print("SSID: ");
+        Serial.println(ap_ssid);
+        Serial.print("Пароль: ");
+        Serial.println(ap_password);
+
+        // Получаем IP адрес точки доступа
+        IPAddress apIP = WiFi.softAPIP();
+        Serial.print("IP адрес AP: ");
+        Serial.println(apIP);
+        Serial.print("MAC адрес AP: ");
+        Serial.println(WiFi.softAPmacAddress());
+
+        // Выводим информацию о сети
+        Serial.println("Подключитесь к этой точке доступа с другого устройства");
+    } else {
+        Serial.println("Ошибка создания точки доступа!");
+        while(1) delay(1000);
     }
 
     pinMode(LED_BUILTIN, OUTPUT);
