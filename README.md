@@ -1,6 +1,6 @@
 This is a ESP32 program. 
 
-It reads ESPNow messages from ELRS backpack, transform its to MAVLink packets and send data by UDP on port 14550.
+It reads ESPNow messages from ELRS backpack, transform CRSF telemetries frames to MAVLink packets and send data by UDP on port 14550.
 
 The programm create WIFI access point with name "mavlink" and password "12345678".
 
