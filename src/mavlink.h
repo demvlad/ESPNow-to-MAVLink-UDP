@@ -1,0 +1,1 @@
+bool buildMAVLinkData(TelemetryData* telemetry, uint8_t** ptrMavlinkData, uint16_t* ptrDataLength);

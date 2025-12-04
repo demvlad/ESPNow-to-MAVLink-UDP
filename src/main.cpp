@@ -7,6 +7,7 @@
 #include <freertos/queue.h>
 
 #include "crsf.h"
+#include "mavlink.h"
 
 #ifndef LED_BUILTIN
   #define LED_BUILTIN 2  // GPIO2 для большинства ESP32
@@ -175,6 +176,10 @@ void processingTask(void* parameter) {
 
             // Парсинг
             parseCRSFPacket(packet.data, packet.len, &telemetry));
+
+            if (buildMAVLinkData(&telemetry, uint8_t** ptrMavlinkData, uint16_t* ptrDataLength)) {
+
+            }
 
             digitalWrite(LED_BUILTIN, LOW);
         }
