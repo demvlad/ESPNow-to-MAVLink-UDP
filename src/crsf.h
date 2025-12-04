@@ -1,3 +1,5 @@
+#ifndef CRSF_H
+#define CRSF_H
 #include <Arduino.h>
 
 // Телеметрия
@@ -22,3 +24,5 @@ struct TelemetryData_t {
 };
 
 bool parseCRSFPacket(const uint8_t *data, int len, TelemetryData_t* telemetry);
+#endif
+
