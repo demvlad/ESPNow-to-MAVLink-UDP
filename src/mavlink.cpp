@@ -8,13 +8,13 @@ bool buildMAVLinkDataStream(TelemetryData_t* telemetry, uint8_t** ptrMavlinkData
     mavlink_message_t mavMsg;
     static uint8_t mavBuffer[MAVLINK_MAX_PACKET_LEN * 4];
     uint16_t dataLength = 0;
-    
+
     if (ptrMavlinkData) {
         *ptrMavlinkData = mavBuffer;
     } else {
         return false;
     }
-    
+
     mavlink_msg_gps_raw_int_pack(MAVLINK_SYSTEM_ID, MAVLINK_COMPONENT_ID, &mavMsg,
         // time_usec Timestamp (microseconds since UNIX epoch or microseconds since system boot)
         micros(),
@@ -49,7 +49,7 @@ bool buildMAVLinkDataStream(TelemetryData_t* telemetry, uint8_t** ptrMavlinkData
         //Yaw in earth frame from north. Use 0 if this GPS does not provide yaw - Unused
         0);
     dataLength += mavlink_msg_to_send_buffer(mavBuffer + dataLength, &mavMsg);
-    
+
     mavlink_msg_attitude_pack(MAVLINK_SYSTEM_ID, MAVLINK_COMPONENT_ID, &mavMsg,
         // time_boot_ms Timestamp (milliseconds since system boot)
         millis(),
@@ -66,7 +66,7 @@ bool buildMAVLinkDataStream(TelemetryData_t* telemetry, uint8_t** ptrMavlinkData
         // yawspeed Yaw angular speed (rad/s)
         0);
     dataLength += mavlink_msg_to_send_buffer(mavBuffer + dataLength, &mavMsg);
-    
+
     mavlink_msg_heartbeat_pack(MAVLINK_SYSTEM_ID, MAVLINK_COMPONENT_ID, &mavMsg,
         // type Type of the MAV (quadrotor, helicopter, etc., up to 15 types, defined in MAV_TYPE ENUM)
         MAV_TYPE_QUADROTOR,
@@ -79,7 +79,7 @@ bool buildMAVLinkDataStream(TelemetryData_t* telemetry, uint8_t** ptrMavlinkData
         // system_status System status flag, see MAV_STATE ENUM
         MAV_STATE_ACTIVE);
     dataLength += mavlink_msg_to_send_buffer(mavBuffer + dataLength, &mavMsg);
-    
+
     mavlink_msg_sys_status_pack(MAVLINK_SYSTEM_ID, MAVLINK_COMPONENT_ID, &mavMsg,
         // onboard_control_sensors_present Bitmask showing which onboard controllers and sensors are present.
         //Value of 0: not present. Value of 1: present. Indices: 0: 3D gyro, 1: 3D acc, 2: 3D mag, 3: absolute pressure,
@@ -116,10 +116,44 @@ bool buildMAVLinkDataStream(TelemetryData_t* telemetry, uint8_t** ptrMavlinkData
         0,
         0);
     dataLength += mavlink_msg_to_send_buffer(mavBuffer + dataLength, &mavMsg);
-    
+/*
+    uint16_t voltages[MAVLINK_MSG_BATTERY_STATUS_FIELD_VOLTAGES_LEN];
+    uint16_t voltagesExt[MAVLINK_MSG_BATTERY_STATUS_FIELD_VOLTAGES_EXT_LEN];
+    memset(voltages, 0xff, sizeof(voltages));
+    memset(voltagesExt, 0, sizeof(voltagesExt));
+    voltages[0] = telemetry->voltage * 1e3;
+
+    int16_t batteryAmperage = telemetry->current * 10;
+    int32_t amperageConsumed = telemetry->capacity;
+    int8_t batteryRemaining = telemetry->batteryRemaining;
+
+    // Temperature: INT16_MAX if unknown
+    int16_t temperature = INT16_MAX;
+
+    mavlink_msg_battery_status_pack(
+        MAVLINK_SYSTEM_ID,
+        MAVLINK_COMPONENT_ID,
+        &mavMsg,
+        0,                    // id: Battery ID (0 = main battery)
+        0,                    // battery_function: 0 = MAV_BATTERY_FUNCTION_UNKNOWN
+        0,                    // type: 0 = MAV_BATTERY_TYPE_UNKNOWN (could use MAV_BATTERY_TYPE_LIPO = 1)
+        temperature,          // temperature: INT16_MAX = unknown
+        voltages,             // voltages[10]: Cell voltages in mV
+        batteryAmperage,      // current_battery: Current in cA
+        amperageConsumed,     // current_consumed: mAh drawn (CRITICAL for "Capa")
+        -1,                   // energy_consumed: -1 = not available (could calculate from Wh if needed)
+        batteryRemaining,     // battery_remaining: Percentage 0-100
+        0,                    // time_remaining: 0 = not calculated
+        MAV_BATTERY_CHARGE_STATE_UNDEFINED, // charge_state: 0 = MAV_BATTERY_CHARGE_STATE_UNDEFINED
+        voltagesExt,          // voltages_ext[4]: Cells 11-14, not used
+        0,                    // mode: 0 = normal
+        0                     // fault_bitmask: 0 = no faults
+    );
+    dataLength += mavlink_msg_to_send_buffer(mavBuffer + dataLength, &mavMsg);
+ */
     if (ptrDataLength) {
         *ptrDataLength = dataLength;
     }
-    
+
     return dataLength > 0;
 }
