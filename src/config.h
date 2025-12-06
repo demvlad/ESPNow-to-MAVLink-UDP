@@ -2,7 +2,7 @@
 #define CONFIG_H
 #include <Arduino.h>
 
-// MAC address ELRS Backpack. Look it at Backpack internet html page.
+// MAC address ELRS Backpack. Look it at Backpack web page.
 uint8_t UID[6] = {78, 82, 166, 251, 35, 234};
 
 // WIFI access point setup

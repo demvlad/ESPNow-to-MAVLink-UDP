@@ -114,9 +114,9 @@ bool parseCRSFPacket(const uint8_t *data, int len, TelemetryData_t* telemetry) {
     const uint8_t* payload = crsfData + 3;
 
     // Statistic update
-    telemetry->packetCount++;
+    telemetry->statistic.packetCount++;
     if (frame_type < 256) {
-        telemetry->crsfPackets[frame_type]++;
+        telemetry->statistic.crsfPackets[frame_type]++;
     }
     telemetry->lastUpdate = millis();
 
@@ -125,37 +125,42 @@ bool parseCRSFPacket(const uint8_t *data, int len, TelemetryData_t* telemetry) {
 
         case CRSF_FRAMETYPE_GPS: // GPS
             if (payload_len >= 15) {
-                telemetry->latitude = bigEndian32(payload) / 10000000.0; // [degree]
-                telemetry->longitude = bigEndian32(payload + 4) / 10000000.0; // [degree]
-                telemetry->groundSpeed = bigEndian16(payload + 8) / 10.0f; // [m/s]
-                telemetry->heading = bigEndian16(payload + 10) * 0.01f; // [degree]
-                telemetry->altitude = bigEndian16(payload + 12) - 1000.0f; // [m] The BF CRFS telemetry add  +1000
-                telemetry->satellites = payload[14];
+                telemetry->gps.enabled = true;
+                telemetry->gps.latitude = bigEndian32(payload) / 10000000.0; // [degree]
+                telemetry->gps.longitude = bigEndian32(payload + 4) / 10000000.0; // [degree]
+                telemetry->gps.groundSpeed = bigEndian16(payload + 8) / 10.0f; // [m/s]
+                telemetry->gps.heading = bigEndian16(payload + 10) * 0.01f; // [degree]
+                telemetry->gps.altitude = bigEndian16(payload + 12) - 1000.0f; // [m] The BF CRFS telemetry add  +1000
+                telemetry->gps.satellites = payload[14];
             }
             break;
 
         case CRSF_FRAMETYPE_BATTERY_SENSOR: // Battery
             if (payload_len >= 8) {
-                telemetry->voltage = bigEndian16(payload) * 0.1f;
-                telemetry->current = bigEndian16(payload + 2) * 0.1f;
-                telemetry->capacity = bigEndian24(payload + 4);
-                telemetry->batteryRemaining = payload[7];
+                telemetry->battery.enabled = true;
+                telemetry->battery.voltage = bigEndian16(payload) * 0.1f;
+                telemetry->battery.current = bigEndian16(payload + 2) * 0.1f;
+                telemetry->battery.capacity = bigEndian24(payload + 4);
+                telemetry->battery.remaining = payload[7];
             }
             break;
 
         case CRSF_FRAMETYPE_ATTITUDE: // Attitude
             if (payload_len >= 6) {
-                telemetry->pitch = bigEndian16(payload) / 10000.0f; // rad*10000 → rad
-                telemetry->roll = bigEndian16(payload + 2) / 10000.0f; // rad*10000 → rad
-                telemetry->yaw = bigEndian16(payload + 4) / 10000.0f; // rad*10000 → rad
+                telemetry->attitude.enabled = true;
+                telemetry->attitude.pitch = bigEndian16(payload) / 10000.0f; // rad*10000 → rad
+                telemetry->attitude.roll = bigEndian16(payload + 2) / 10000.0f; // rad*10000 → rad
+                telemetry->attitude.yaw = bigEndian16(payload + 4) / 10000.0f; // rad*10000 → rad
             }
             break;
 
         case CRSF_FRAMETYPE_FLIGHT_MODE: // Flight Mode
             if (payload_len >= 1) {
+                telemetry->flightMode.enabled = true;
                 int len = payload_len < 16 ? payload_len : 16;
-                memcpy(telemetry->flightMode, payload, len);
-                telemetry->flightMode[len] = '\0';
+                memcpy(telemetry->flightMode.mode, payload, len);
+                telemetry->flightMode.mode[len] = '\0';
+                telemetry->flightMode.armed = true; // TODO: perse mode string to define arm flag
             }
             break;
     }

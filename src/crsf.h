@@ -4,22 +4,37 @@
 
 // Телеметрия
 struct TelemetryData_t {
-    float voltage;
-    float current;
-    uint32_t capacity;
-    uint8_t batteryRemaining;
-    float pitch;
-    float roll;
-    float yaw;
-    char flightMode[17];
-    double latitude;
-    double longitude;
-    float altitude;
-    float groundSpeed;
-    float heading;
-    uint8_t satellites;
-    uint32_t packetCount;
-    uint32_t crsfPackets[256];
+    struct {
+        bool enabled;
+        float voltage;
+        float current;
+        uint32_t capacity;
+        uint8_t remaining;
+    } battery;
+    struct {
+        bool enabled;
+        float pitch;
+        float roll;
+        float yaw;
+     } attitude;
+    struct {
+        bool enabled;
+        char mode[17];
+        bool armed;
+    } flightMode;
+    struct {
+        bool enabled;
+        double latitude;
+        double longitude;
+        float altitude;
+        float groundSpeed;
+        float heading;
+        uint8_t satellites;
+    } gps;
+    struct {
+        uint32_t packetCount;
+        uint32_t crsfPackets[256];
+    } statistic;
     unsigned long lastUpdate;
 };
 

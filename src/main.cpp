@@ -224,26 +224,26 @@ void printTelemetry(const TelemetryData_t* td) {
 
     // Верхняя строка: основные показатели
     Serial.printf("📦 Pkts: %lu | ⏱️ Age: %lums\n",
-                 td->packetCount, millis() - td->lastUpdate);
+                 td->statistic.packetCount, millis() - td->lastUpdate);
 
     // Батарея с графиком
     Serial.print("🔋 Battery: ");
-    if (td->voltage >= 4.0) Serial.print("🟢 ");
-    else if (td->voltage >= 3.7) Serial.print("🟡 ");
-    else if (td->voltage >= 3.3) Serial.print("🔴 ");
+    if (td->battery.voltage >= 4.0) Serial.print("🟢 ");
+    else if (td->battery.voltage >= 3.7) Serial.print("🟡 ");
+    else if (td->battery.voltage >= 3.3) Serial.print("🔴 ");
     else Serial.print("⛔ ");
 
-    Serial.printf("%.2fV (%.1fA) | ", td->voltage, td->current);
-    Serial.printf("%d%% | ", td->batteryRemaining);
-    Serial.printf("Cap: %lumAh\n", td->capacity);
+    Serial.printf("%.2fV (%.1fA) | ", td->battery.voltage, td->battery.current);
+    Serial.printf("%d%% | ", td->battery.remaining);
+    Serial.printf("Cap: %lumAh\n", td->battery.capacity);
 
     // Attitude в компактном виде
     Serial.printf("✈️ Att: P%.0f° R%.0f° Y%.0f°\n",
-                 td->pitch * 57.3, td->roll * 57.3, td->yaw * 57.3);
+                 td->attitude.pitch * 57.3, td->attitude.roll * 57.3, td->attitude.yaw * 57.3);
 
 
     // Режим полета
-    if (strlen(td->flightMode) > 0) {
+    if (strlen(td->flightMode.mode) > 0) {
         Serial.printf("📊 Mode: %s\n", td->flightMode);
     }
 
@@ -251,9 +251,9 @@ void printTelemetry(const TelemetryData_t* td) {
     Serial.print("📊 Packets: ");
     int count = 0;
     for (int i = 0; i < 32; i++) {
-        if (td->crsfPackets[i] > 0) {
+        if (td->statistic.crsfPackets[i] > 0) {
             if (count++ > 0) Serial.print(", ");
-            Serial.printf("0x%02X:%lu", i, td->crsfPackets[i]);
+            Serial.printf("0x%02X:%lu", i, td->statistic.crsfPackets[i]);
         }
     }
     if (count == 0) Serial.print("None");
@@ -289,7 +289,7 @@ void loop() {
         unsigned long age = millis() - telemetriesData.lastUpdate;
 
         Serial.printf("[STATUS] Age:%lums Packets:%lu Queue:%d/%d",
-                     age, telemetriesData.packetCount,
+                     age, telemetriesData.statistic.packetCount,
                      uxQueueMessagesWaiting(packetQueue), QUEUE_SIZE);
 
         if (age > TELEMETRY_TIMEOUT_MS) {
@@ -305,7 +305,7 @@ void loop() {
 
     // Show full telemetries data
     if (millis() - lastTelemetryPrint >= 5000) {
-        if (telemetriesData.packetCount > 0 && millis() - telemetriesData.lastUpdate < 2000) {
+        if (telemetriesData.statistick.packetCount > 0 && millis() - telemetriesData.lastUpdate < 2000) {
             printTelemetry(&telemetriesData);
         }
         lastTelemetryPrint = millis();
